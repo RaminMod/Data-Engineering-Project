@@ -1,2 +1,3 @@
 Just trying to see how it works
 Used git config user.name "MyUserName"
+Using git config --global user.name "MyUserName"
