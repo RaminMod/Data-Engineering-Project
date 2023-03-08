@@ -3,4 +3,4 @@ Used git config user.name "MyUserName"
 Using git config --global user.name "MyUserName"
 Using git config user.name and git git config user.mail
 Running the above but from the main folder
-
+Tried clearing credentials and setting cache time to 1s
