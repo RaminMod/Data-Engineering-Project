@@ -4,21 +4,19 @@ import numpy as np
 import glob
 import os
 import matplotlib.pyplot as plt
+
 dataset_path = glob.glob('/home/project_data/MillionSongSubset/*/*/*/*.h5')
 len(dataset_path)
+
 total_size = 0
 for file in dataset_path:
     if os.path.isfile(file):
         total_size += os.path.getsize(file)
 print("Total size of files: {:.2f} GB".format(total_size/(1024*1024*1024)))
 
-
-
-import h5py
-import pandas as pd
-import glob
-dataset_path = '/home/project_data/MillionSongSubset/*/*/*/*.h5'
+# creating an empty list to hold metadata information from all files
 metadata_rows = []
+# loop through each file in the dataset path
 for file_path in glob.glob(dataset_path):
     with h5py.File(file_path, 'r') as f:
         metadata = f['/metadata/songs']
@@ -28,7 +26,7 @@ for file_path in glob.glob(dataset_path):
             metadata_dict[column_name] = metadata[column_name][0]
         metadata_rows.append(metadata_dict)
 metadata_df = pd.DataFrame(metadata_rows)
-print(metadata_df.head())
+metadata_df.head()
 
 
 """
@@ -41,33 +39,48 @@ dataset_path = '/home/project_data/MillionSongSubset/*/*/*/*.h5'
 table_rows = []
 for file_path in glob.glob(dataset_path):
     with h5py.File(file_path, 'r') as f:
+        # extract song metadata information from the 'metadata/songs' group in the HDF5 file
         song_hotttnesss = f['/metadata/songs']['song_hotttnesss'][:]
-        year = f['/musicbrainz/songs']['year'][:]
         song_id = f['/metadata/songs']['song_id'][:]
         genre = f['/metadata/songs']['genre'][:]
+        # extract year information from the 'musicbrainz/songs' group in the HDF5 file        
+        year = f['/musicbrainz/songs']['year'][:]
+        
         for i in range(len(song_hotttnesss)):
+            # check if the song's hotttnesss and year information is available and not NaN
             if not np.isnan(song_hotttnesss[i]) and year[i]:
                 if year[i] == 0:
                     year_str = "N/A"
                 else:
                     year_str = str(year[i])
                 table_rows.append([song_id[i], song_hotttnesss[i], year_str, genre[i]])
+# sort the list of all songs by hotttnesss in descending order
 table_rows.sort(key=lambda x: x[1], reverse=True)
+
 df = pd.DataFrame(table_rows, columns=['Song ID', 'Song Hotttnesss', 'Year', 'Genre'])
+# convert the 'Year' column to numeric values and handle any conversion errors
 df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+
 fig, ax = plt.subplots(figsize=(10, 5))
+# group the songs by year and get the maximum hotttnesss for each year
 max_hotttnesss = df.groupby('Year')['Song Hotttnesss'].max()
+
+# plot a bar chart of the maximum hotttnesss for each year
 max_hotttnesss.plot(kind='bar', ax=ax)
+
 ax.set_xlabel('Year')
 ax.set_ylabel('Song Hotttnesss')
 ax.set_ylim([0, 1])
 plt.show()
+
+# sort the DataFrame by hotttnesss in descending order and print the top 10 rows
 df = df.sort_values(by=['Song Hotttnesss'], ascending=False)
 print(df.head(10))
+
+
 print(metadata_df['genre'])
 unique_genres = metadata_df['genre'].unique()
 print(unique_genres)
-
 
 
 """
@@ -85,13 +98,6 @@ r: Rock
 
 
 
-
-import h5py
-import pandas as pd
-import glob
-import numpy as np
-import matplotlib.pyplot as plt
-dataset_path = '/home/project_data/MillionSongSubset/*/*/*/*.h5'
 table_rows = []
 for file_path in glob.glob(dataset_path):
     with h5py.File(file_path, 'r') as f:
